@@ -1,0 +1,73 @@
+<p-toast />
+
+<div class="page-container">
+
+  <div class="page-header">
+    <h2>Book Categories</h2>
+    <button pButton label="+ Add Category" (click)="openAddModal()"></button>
+  </div>
+
+  <div class="table-card">
+    <p-table [value]="categories" [paginator]="true" [rows]="10" styleClass="p-datatable-gridlines">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>#</th>
+          <th>Category Name</th>
+          <th>Description</th>
+          <th>Actions</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-cat let-i="rowIndex">
+        <tr>
+          <td>{{ i + 1 }}</td>
+          <td>{{ cat.name }}</td>
+          <td>{{ cat.description || '—' }}</td>
+          <td>
+            <button pButton icon="pi pi-pencil" class="p-button-sm p-button-text" (click)="openEditModal(cat)"></button>
+            <button pButton icon="pi pi-trash" class="p-button-sm p-button-text p-button-danger" (click)="confirmDelete(cat.id)"></button>
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage">
+        <tr><td colspan="4" style="text-align:center; padding:32px">No categories yet.</td></tr>
+      </ng-template>
+    </p-table>
+  </div>
+
+</div>
+
+<!-- Add/Edit Modal -->
+<p-dialog [(visible)]="showModal"
+  [header]="editingId ? 'Edit Category' : 'Add Category'"
+  [modal]="true" [style]="{width:'480px'}">
+  <form [formGroup]="form">
+    <div class="field">
+      <label>Category Name *</label>
+      <input pInputText formControlName="name" placeholder="e.g. Science Fiction" style="width:100%"/>
+      <small class="p-error" *ngIf="nameCtrl?.touched && nameCtrl?.hasError('required')">
+        Category name is required.
+      </small>
+      <small class="p-error" *ngIf="nameCtrl?.touched && nameCtrl?.hasError('uniqueName')">
+        Category name must be unique.
+      </small>
+    </div>
+    <div class="field">
+      <label>Description</label>
+      <textarea pTextarea formControlName="description"
+        placeholder="Optional description..." rows="3" style="width:100%"></textarea>
+    </div>
+  </form>
+  <ng-template pTemplate="footer">
+    <button pButton label="Cancel" class="p-button-text" (click)="closeModal()"></button>
+    <button pButton label="Save" (click)="saveCategory()"></button>
+  </ng-template>
+</p-dialog>
+
+<!-- Confirm Delete Modal -->
+<p-dialog [(visible)]="showConfirm" header="Confirm Delete" [modal]="true" [style]="{width:'380px'}">
+  <p style="margin:0; color:#555">Are you sure you want to delete this category? This cannot be undone.</p>
+  <ng-template pTemplate="footer">
+    <button pButton label="Cancel" class="p-button-text" (click)="showConfirm=false"></button>
+    <button pButton label="Delete" severity="danger" (click)="deleteCategory()"></button>
+  </ng-template>
+</p-dialog>

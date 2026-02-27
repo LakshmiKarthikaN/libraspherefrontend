@@ -1,0 +1,148 @@
+<p-toast />
+
+<div class="page-container">
+
+  <div class="page-header">
+    <h2>Books Library</h2>
+    <button pButton label="+ Add Book" (click)="openAddModal()"></button>
+  </div>
+
+  <div class="filters-row">
+    <input pInputText [(ngModel)]="searchTerm" (input)="loadBooks()"
+      placeholder="Search by book name..." style="width:250px"/>
+
+    <p-select
+      [options]="categories"
+      [(ngModel)]="selectedCategoryId"
+      (onChange)="loadBooks()"
+      optionLabel="name"
+      optionValue="id"
+      placeholder="All Categories"
+      [showClear]="true"
+      appendTo="body"
+      style="width:220px">
+    </p-select>
+  </div>
+
+  <div class="table-card">
+    <p-table [value]="books" [paginator]="true" [rows]="10" styleClass="p-datatable-gridlines">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>#</th>
+          <th>Book Name</th>
+          <th>Author</th>
+          <th>ISBN</th>
+          <th>Published Date</th>
+          <th>Category</th>
+          <th>Actions</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-book let-i="rowIndex">
+        <tr>
+          <td>{{ i + 1 }}</td>
+          <td>{{ book.bookName }}</td>
+          <td>{{ book.author }}</td>
+          <td><code>{{ book.isbn }}</code></td>
+          <td>{{ book.publishedDate | date:'mediumDate' }}</td>
+          <td><p-tag [value]="getCategoryName(book.categoryId)" severity="info" /></td>
+          <td>
+            <button pButton icon="pi pi-pencil" class="p-button-sm p-button-text" (click)="openEditModal(book)"></button>
+            <button pButton icon="pi pi-trash" class="p-button-sm p-button-text p-button-danger" (click)="confirmDelete(book.id!)"></button>
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="7" style="text-align:center; padding:32px">No books found.</td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+
+</div>
+
+<!-- Book Form Modal -->
+<p-dialog
+  [(visible)]="showModal"
+  [header]="editingId ? 'Edit Book' : 'Add Book'"
+  [modal]="true"
+  [style]="{width:'520px'}"
+  [draggable]="false"
+  [resizable]="false">
+
+  <form [formGroup]="form" style="display:flex; flex-direction:column; gap:4px">
+
+    <div class="field">
+      <label>Book Name *</label>
+      <input pInputText formControlName="bookName"
+        placeholder="e.g. Dune" style="width:100%"/>
+      <small class="p-error"
+        *ngIf="bookNameCtrl?.touched && bookNameCtrl?.hasError('required')">
+        Book name is required.
+      </small>
+    </div>
+
+    <div class="field">
+      <label>Author *</label>
+      <input pInputText formControlName="author"
+        placeholder="e.g. Frank Herbert" style="width:100%"/>
+      <small class="p-error"
+        *ngIf="authorCtrl?.touched && authorCtrl?.hasError('required')">
+        Author is required.
+      </small>
+    </div>
+
+    <div class="field">
+      <label>ISBN *</label>
+      <input pInputText formControlName="isbn"
+        placeholder="e.g. 978-0-441-01985-7" style="width:100%"/>
+      <small class="p-error"
+        *ngIf="isbnCtrl?.touched && isbnCtrl?.hasError('required')">
+        ISBN is required.
+      </small>
+      <small class="p-error"
+        *ngIf="isbnCtrl?.touched && isbnCtrl?.hasError('uniqueIsbn')">
+        ISBN must be unique.
+      </small>
+    </div>
+
+    <div class="field">
+      <label>Published Date *</label>
+      <p-datepicker
+        formControlName="publishedDate"
+        dateFormat="yy-mm-dd"
+        [showIcon]="true"
+        appendTo="body"
+        style="width:100%">
+      </p-datepicker>
+      <small class="p-error"
+        *ngIf="dateCtrl?.touched && dateCtrl?.hasError('required')">
+        Published date is required.
+      </small>
+    </div>
+
+    <div class="field">
+      <label>Category *</label>
+      <!-- ✅ ONLY formControlName here, NO [(ngModel)] -->
+      <p-select
+        formControlName="categoryId"
+        [options]="categories"
+        optionLabel="name"
+        optionValue="id"
+        placeholder="Select a category"
+        appendTo="body"
+        style="width:100%">
+      </p-select>
+      <small class="p-error"
+        *ngIf="catCtrl?.touched && catCtrl?.hasError('required')">
+        Category is required.
+      </small>
+    </div>
+
+  </form>
+
+  <ng-template pTemplate="footer">
+    <button pButton label="Cancel" class="p-button-text" (click)="closeModal()"></button>
+    <button pButton label="Save" (click)="saveBook()"></button>
+  </ng-template>
+</p-dialog>
